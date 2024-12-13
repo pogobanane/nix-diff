@@ -16,21 +16,6 @@ nix_subproject = subproject('nix_subproject',
   default_options : {'bindings': false}
 )
 
-libflake_c = subproject('libflake-c')
-libflake_c_inc_dirs = libflake_c.get_variable('include_dirs')
-libutil_c = subproject('libutil-c')
-libutil_c_inc_dirs = libutil_c.get_variable('include_dirs')
-libexpr_c = subproject('libexpr-c')
-libexpr_c_inc_dirs = libexpr_c.get_variable('include_dirs')
-libstore_c = subproject('libstore-c')
-libstore_c_inc_dirs = libstore_c.get_variable('include_dirs')
-
-libX_c_incr_dirs = [
-  libflake_c_inc_dirs,
-  libutil_c_inc_dirs,
-  libexpr_c_inc_dirs,
-  # libstore_c_inc_dirs
-]
 
 libflake_dep = dependency('nix-flake-c', fallback: 'libflake-c')
 
