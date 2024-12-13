@@ -1,0 +1,3 @@
+[submodule "subprojects/nix_subproject"]
+	path = subprojects/nix_subproject
+	url = https://github.com/NixOS/nix.git
