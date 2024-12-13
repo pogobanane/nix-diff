@@ -1,12 +1,12 @@
 project(
   'myexec',
-  'c',
+  'cpp',
   version : '1.1.0',
   default_options : ['warning_level=3']
 )
 
 project_source_files = [
-  'main.c'
+  'main.cc'
 ]
 
 # includes = include_directories ('/home/peter/dev/nix/nix/outputs/dev/include/nix/')

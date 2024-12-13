@@ -1,3 +1,4 @@
+#include <fstream>
 #include <nix_api_util.h>
 #include <nix_api_expr.h>
 #include <nix_api_value.h>
@@ -21,7 +22,11 @@ int main()
     EvalState * state = nix_state_create(NULL, NULL, store); // empty search path (NIX_PATH)
     Value * value = nix_alloc_value(NULL, state);
 
-    nix_expr_eval_from_string(NULL, state, "builtins.nixVersion", ".", value);
+    std::ifstream ifs("dump-config.nix");
+    std::string content( (std::istreambuf_iterator<char>(ifs) ),
+                       (std::istreambuf_iterator<char>()    ) );
+
+    nix_expr_eval_from_string(NULL, state, content.c_str(), ".", value);
     nix_value_force(NULL, state, value);
 
     char * version;
