@@ -44,7 +44,7 @@ int main()
     nix::EvalState state = nix::EvalState({}, store, fetchSettings, settings);
 
     // Value * value = nix_alloc_value(NULL, state);
-    auto value = state.allocValue();
+    nix::Value * value = state.allocValue();
     // // nix_printer nix_printer = nix_printer(std::cout);
 
     // std::ifstream ifs("dump-config.nix");
@@ -52,6 +52,12 @@ int main()
     //                    (std::istreambuf_iterator<char>()    ) );
 
     // // nix_expr_eval_from_string(NULL, state, "{ \"a\" = \"foo\"; }", ".", value);
+    std::string expr = "{ \"a\" = \"foo\"; }";
+    nix::Expr * parsedExpr = state.parseExprFromString(expr, state.rootPath(nix::CanonPath(".")));
+    state.eval(parsedExpr, *value);
+    state.forceValue(*value, nix::noPos);
+    value->print(state, std::cout);
+
     // nix_expr_eval_from_string(NULL, state, content.c_str(), ".", value);
     // nix_value_force(NULL, state, value);
 
