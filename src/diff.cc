@@ -40,14 +40,24 @@ public:
   }
 
   void diff_value(nix::Value *value, const AttrPath *path) {
-    this->state->forceValue(*value, nix::noPos);
-
     std::cerr << " > ";
     for(auto name : *path) {
       std::cerr << this->state->symbols[name].c_str() << " > ";
     }
     value->print(*this->state, std::cerr);
     std::cerr << std::endl;
+
+    try {
+      this->state->forceValue(*value, nix::noPos);
+    } catch (nix::Error &e) {
+      auto json_path = this->json_path(path);
+      // auto name = this->state->symbols[value.name].c_str();
+      //         std:typeid(e).name() << "\n";
+      // this->json.at_pointer(json_path).as_object().emplace("ERROR", e.what());
+      this->json.at_pointer(json_path).as_object().emplace("ERROR", typeid(e).name());
+      std::cerr << e.what() << std::endl;
+      return;
+    }
 
     switch(value->type()) {
       case nix::ValueType::nAttrs:
