@@ -3,6 +3,7 @@
 #include "value.hh"
 #include <cstdio>
 #include <boost/json/src.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 namespace diff {
 
@@ -15,12 +16,18 @@ private:
   nix::EvalState *state;
 
   std::set<nix::Value*> visited;
+  std::set<std::string> ignore = {"extraSpecialArgs", "haskellPackages", "x86_64-linux", "pkgsi586Linux", "aarch64-linux", "legacyPackages", "pkgs", "vmVariant", "vmVariantWithBootLoader"}; // unused
 
   std::string json_path(const AttrPath *path) {
     std::stringstream ret("");
     for(auto symbol: *path) {
       auto name = this->state->symbols[symbol].c_str();
-      ret << "/" << name;
+      auto name_str = std::string(name);
+      // std::replace(name_str.begin(), name_str.end(), "/", "~1");
+      // std::replace(name_str.begin(), name_str.end(), "~", "~0");
+      boost::algorithm::replace_all(name_str, "~", "~0");
+      boost::algorithm::replace_all(name_str, "/", "~1");
+      ret << "/" << name_str;
     }
     return ret.str();
   }
@@ -45,6 +52,14 @@ private:
     return false;
   }
 
+  bool isIgnored(const char *name) {
+    for (auto ingore_name : this->ignore) {
+      if(std::string(name).compare(ingore_name) == 0) {
+        return true;
+      }
+    }
+    return false;
+  }
 public:
 
   void diff(nix::EvalState *state, nix::Expr *expr) {
@@ -65,7 +80,7 @@ public:
     for(auto name : *path) {
       std::cerr << this->state->symbols[name].c_str() << " > ";
     }
-    value->print(*this->state, std::cerr);
+    // value->print(*this->state, std::cerr);
     std::cerr << std::endl;
 
     try {
@@ -107,6 +122,10 @@ public:
       if(this->visited.find(attr.value) != this->visited.end()) {
         this->json.at_pointer(json_path).as_object().emplace(name, "RECURSION");
         continue; // skip to avoid recursion
+      }
+      if(this->isIgnored(name)) {
+        this->json.at_pointer(json_path).as_object().emplace(name, "IGNORED");
+        continue; // intruces recursion for us
       }
       this->visited.insert(attr.value);
 

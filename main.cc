@@ -16,6 +16,7 @@
 // #include <nix_api_value.h>
 #include <stdlib.h>
 #include <string.h>
+#include <boost/json/src.hpp>
 
 // NOTE: This example lacks all error handling. Production code must check for
 // errors, as some return values will be undefined.
@@ -25,8 +26,32 @@ void my_get_string_cb(const char * start, unsigned int n, void * user_data)
     *((char **) user_data) = strdup(start);
 }
 
+boost::json::value &foo(boost::json::value &json) {
+    auto j1 = json.as_object().at("key");
+    std::cout << j1 << std::endl;
+    // auto j2 = json.as_object().at("key2");
+    // std::cout << j2 << std::endl;
+    return j1;
+}
+
 int main()
 {
+    boost::json::value json;
+    json = {};
+    json.at_pointer("").emplace_object();
+    std::cerr << json << std::endl;
+
+    // json.as_object().at("key") = {};
+    json.as_object().emplace("ke/y", nullptr);
+    json.as_object().at("ke/y").emplace_object();
+    json.at_pointer("/ke~1y").as_object().emplace("key2", nullptr);
+    // json.as_object().at("key").as_object().emplace("key2", boost::json::object());
+    std::cerr << json << std::endl;
+    // json.as_object().at("key").emplace_object();
+    // // foo(json).emplace_object();
+    // foo(json).as_object().emplace("key3", nullptr);
+    // std::cout << json << std::endl;
+
     // nix_libexpr_init(NULL);
     nix::initLibUtil(); // throws
     nix::initLibStore(); // throws
