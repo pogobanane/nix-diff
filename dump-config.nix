@@ -95,22 +95,22 @@ let
   sanitizingError = (tryEvalResult:
     "Error: value of type ${builtins.typeOf tryEvalResult.value} cannot be evaluated due to an error (throw or assert)"
   );
-  sanitize = (value: 
+  sanitize = (value:
         let
           resultShallow = builtins.tryEval value;
           valueType = builtins.typeOf resultShallow.value;
         in
-        (if resultShallow.success then 
-          (if (valueType == "set") then 
-              (sanitizerAttrset value) 
+        (if resultShallow.success then
+          (if (valueType == "set") then
+              (sanitizerAttrset value)
             else (if (valueType == "list") then
               (sanitizerList value)
             else
               resultShallow.value
           ))
         else
-          (if (valueType == "set") then 
-              (sanitizerAttrset value) 
+          (if (valueType == "set") then
+              (sanitizerAttrset value)
             else (if (valueType == "list") then
               (sanitizerList value)
             else
@@ -126,7 +126,7 @@ let
           isAttrset = valueType == "set";
           hasFunctor = builtins.hasAttr "__functor" resultShallow.value;
         in
-        (if resultShallow.success then 
+        (if resultShallow.success then
           (if (isAttrset && hasFunctor) then
             (lib.trace "Error found in ${path2String path}" (sanitizingError resultShallow))
           else
@@ -151,9 +151,9 @@ let
         isAttrset = type == "set";
         currentPath = path ++ [name];
       in
-        if isAttrset then 
+        if isAttrset then
           mapRecAttrsRec value currentPath (visited ++ [currentPath])
-        else 
+        else
           "${currentPath}" # terminate recursion (return)
       )
       config
@@ -161,14 +161,14 @@ let
   # recursively list all attribute paths of a recursive (infinite) attrset
   listRecAttrsRec = (attrset: path:
     lib.mapAttrsToList
-    (name: value: let 
+    (name: value: let
         currentPath = path ++ [name];
         type = builtins.typeOf value;
         isAttrset = type == "set";
         childrenPaths = (
-          if isAttrset then 
-            listRecAttrsRec value currentPath 
-         else 
+          if isAttrset then
+            listRecAttrsRec value currentPath
+         else
             []
         );
       in (lib.trace (childrenPaths) (
@@ -197,7 +197,7 @@ let
       value = attrset;
     };
     # TODO i guess we can also throw in attrsets when it contains a name like "${throw foo}"
-    getChildren = attrset: lib.mapAttrsToList (name: value: 
+    getChildren = attrset: lib.mapAttrsToList (name: value:
       { inherit value; path = path ++ [name]; }
       ) attrset;
     children = getChildren attrset;
@@ -215,9 +215,9 @@ let
       in
         (if isAttrset then
           (if isSeen then
-            [(mkValue { 
-              mytype = "reference"; 
-              value = firstSeen.path; 
+            [(mkValue {
+              mytype = "reference";
+              value = firstSeen.path;
               inherit (child) path;
             })]
           else (if isDerivation then
@@ -239,23 +239,23 @@ let
         )
     );
 
-    childrenPathsFlat = lib.foldl 
+    childrenPathsFlat = lib.foldl
       (list: child: let
           seen' = seen ++ list ++ [parent];
-        in 
+        in
           (list ++ (childPaths seen' child))
-      ) 
+      )
       []
       children
     ;
     msg = {
       inherit path;
     };
-  in 
-    trace msg 
+  in
+    trace msg
     ([parent] ++ childrenPathsFlat)
   );
-  sanitizerList = (config: 
+  sanitizerList = (config:
     builtins.map
       (value:
         (sanitize value)
@@ -268,7 +268,7 @@ let
   attrsetUpdates = builtins.map (node:
     if node.mytype == "attrset" then
       {
-        # TODO not sure how to create an empty attrset here. If there is already something in the attrset, it is just replaced with an empty one. 
+        # TODO not sure how to create an empty attrset here. If there is already something in the attrset, it is just replaced with an empty one.
         path = [ "TODO" ];
         update = old: true;
       }
@@ -289,7 +289,7 @@ let
   # result = lib.updateManyAttrsByPath attrsetUpdates {};
   result = {
     inherit configGood;
-    inherit configBad;
+    inherit configBadRec;
   };
 in
   result
@@ -301,21 +301,21 @@ in
 # sanitizerAttrset configBad
 # listRecAttrsRec2 configGood [] []
 # listRecAttrsRec2 configGood [] []
-# builtins.toJSON configBadRec 
+# builtins.toJSON configBadRec
 
 # This currently doesnt work on recursive configurations:
 # works: nix-repl> :p rec { a = { b = 1; c= a; }; }
 # but we cannot work on it without infinite recursion: :p lib.mapAttrsRecursive (name: value: if name == "b" then 2 else value) rec { a = { b = 1; c= a; }; }
-# we could just set b, that requires knowledge of the name "b" at evaluation time. 
-# Instead we want to (1) filter for values matching a criterion (throws) 
+# we could just set b, that requires knowledge of the name "b" at evaluation time.
+# Instead we want to (1) filter for values matching a criterion (throws)
 # and then (2) apply a map operation on them
 #
 # Simplification:
 # Given a recursive attrset, we want to find all attrs, that fulfill a condition (say `value == "needle"`)
-# `:p` in `nix repl` does this, but i need it as a nix function. 
+# `:p` in `nix repl` does this, but i need it as a nix function.
 # `lib.mapAttrsRecursiveCond` has no path/key-name available to `cond`. Hence we cannot use it to avoid recursion.
 # Should we just build the list of visited paths ourselves?
 
-# Next issue: nixos config is refusing to evalute because of internal errors like `attribute missing`. 
+# Next issue: nixos config is refusing to evalute because of internal errors like `attribute missing`.
 # Discussed solutions: https://github.com/NixOS/nix/issues/356
 # https://github.com/NixOS/nix/pull/5564 use this patch for a project-custom nix

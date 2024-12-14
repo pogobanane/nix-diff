@@ -5,12 +5,12 @@
 #include "store-api.hh"
 #include "util.hh"
 #include "fetch-settings.hh"
+#include "src/diff.cc"
 #include <fstream>
 #include <iostream>
 // #include <nix_api_util.h>
 // #include <nix_api_expr.h>
 // #include <nix_api_value.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -56,7 +56,12 @@ int main()
     nix::Expr * parsedExpr = state.parseExprFromString(content, state.rootPath(nix::CanonPath(".")));
     state.eval(parsedExpr, *value);
     state.forceValue(*value, nix::noPos);
-    value->print(state, std::cout);
+
+    value->print(state, std::cerr);
+    std::cerr << std::endl;
+
+    auto diff = diff::Diff{};
+    diff.diff(&state, *value);
 
     // nix_expr_eval_from_string(NULL, state, content.c_str(), ".", value);
     // nix_value_force(NULL, state, value);
