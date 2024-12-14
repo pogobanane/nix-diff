@@ -45,6 +45,12 @@ int main()
     json.as_object().emplace("ke/y", nullptr);
     json.as_object().at("ke/y").emplace_object();
     json.at_pointer("/ke~1y").as_object().emplace("key2", nullptr);
+    json.as_object().emplace("kex", nullptr);
+    json.at_pointer("/kex").emplace_array();
+    std::cerr << json << std::endl;
+    json.at_pointer("/kex").as_array().push_back(nullptr);
+    std::cerr << json << std::endl;
+    json.at_pointer("/kex/0").emplace_object();
     // json.as_object().at("key").as_object().emplace("key2", boost::json::object());
     std::cerr << json << std::endl;
     // json.as_object().at("key").emplace_object();

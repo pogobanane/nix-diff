@@ -21,6 +21,7 @@ libflake_dep = dependency('nix-flake', fallback: 'libflake')
 libstore_dep = dependency('nix-store', fallback: 'libstore')
 libexpr_dep = dependency('nix-expr', fallback: 'libexpr')
 libmain_dep = dependency('nix-main', fallback: 'libmain')
+libutil_dep = dependency('nix-util', fallback: 'libutil')
 
 libnixs = [
   libflake_dep,
