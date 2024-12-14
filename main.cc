@@ -1,9 +1,12 @@
 // #include "nix_api_expr_internal.h"
 #include "eval-gc.hh"
 #include "eval.hh"
+#include "flake/flake.hh"
+#include "flake/settings.hh"
 #include "globals.hh"
 #include "store-api.hh"
 #include "util.hh"
+#include "plugin.hh"
 #include "fetch-settings.hh"
 #include "src/diff.cc"
 #include <fstream>
@@ -28,6 +31,7 @@ int main()
     nix::initLibUtil(); // throws
     nix::initLibStore(); // throws
     nix::initGC(); // throws
+    nix::initPlugins(); // throws
 
 
     // Store * store = nix_store_open(NULL, "dummy://", NULL);
@@ -39,9 +43,15 @@ int main()
 
     // EvalState * state = nix_state_create(NULL, NULL, store); // empty search path (NIX_PATH)
     auto fetchSettings = nix::fetchers::Settings{};
+
+    nix::flake::Settings flakeSettings;
+    nix::flake::initLib(flakeSettings);
+
     bool readOnly = false;
     nix::EvalSettings settings = nix::EvalSettings{readOnly, {}};
     nix::EvalState state = nix::EvalState({}, store, fetchSettings, settings);
+
+
 
     // Value * value = nix_alloc_value(NULL, state);
     nix::Value * value = state.allocValue();
