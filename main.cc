@@ -47,13 +47,13 @@ int main()
     nix::Value * value = state.allocValue();
     // // nix_printer nix_printer = nix_printer(std::cout);
 
-    // std::ifstream ifs("dump-config.nix");
-    // std::string content( (std::istreambuf_iterator<char>(ifs) ),
-    //                    (std::istreambuf_iterator<char>()    ) );
+    std::ifstream ifs("dump-config.nix");
+    std::string content( (std::istreambuf_iterator<char>(ifs) ),
+                       (std::istreambuf_iterator<char>()    ) );
 
     // // nix_expr_eval_from_string(NULL, state, "{ \"a\" = \"foo\"; }", ".", value);
     std::string expr = "{ \"a\" = \"foo\"; }";
-    nix::Expr * parsedExpr = state.parseExprFromString(expr, state.rootPath(nix::CanonPath(".")));
+    nix::Expr * parsedExpr = state.parseExprFromString(content, state.rootPath(nix::CanonPath(".")));
     state.eval(parsedExpr, *value);
     state.forceValue(*value, nix::noPos);
     value->print(state, std::cout);
