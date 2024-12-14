@@ -18,12 +18,13 @@ nix_subproject = subproject('nix_subproject',
 
 
 libflake_dep = dependency('nix-flake-c', fallback: 'libflake-c')
-
 libstore_dep = dependency('nix-store-c', fallback: 'libstore-c')
+libexpr_dep = dependency('nix-expr-c', fallback: 'libexpr-c')
 
 libX_deps = [
   libflake_dep,
-  libstore_dep
+  libstore_dep,
+  libexpr_dep
 ]
 # libstore_dep = libstore_c.get_variable('nix-store-c')
 
