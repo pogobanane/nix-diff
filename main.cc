@@ -54,14 +54,9 @@ int main()
     // // nix_expr_eval_from_string(NULL, state, "{ \"a\" = \"foo\"; }", ".", value);
     std::string expr = "{ \"a\" = \"foo\"; }";
     nix::Expr * parsedExpr = state.parseExprFromString(content, state.rootPath(nix::CanonPath(".")));
-    state.eval(parsedExpr, *value);
-    state.forceValue(*value, nix::noPos);
-
-    value->print(state, std::cerr);
-    std::cerr << std::endl;
 
     auto diff = diff::Diff{};
-    diff.diff(&state, *value);
+    diff.diff(&state, parsedExpr);
 
     // nix_expr_eval_from_string(NULL, state, content.c_str(), ".", value);
     // nix_value_force(NULL, state, value);
