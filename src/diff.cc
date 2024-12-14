@@ -59,28 +59,22 @@ public:
   }
 
   void diff_attrset(nix::Value *value, const AttrPath *path) {
-    // boost::json::object json_attrset;
-    // this->json_object(&json_attrset, path);
     auto json_path = this->json_path(path);
 
     // nix::PosIdx last_index;
     for (auto attr : *value->attrs()) {
       // assert(last_index < attr.pos);
       // last_index = attr.pos;
-      auto name = this->state->symbols[attr.name].c_str();
-      // json[name] = nullptr;
-      // auto json_path = std::format("/{}", name);
-      // auto json_path = std::format("/{}", "name");
-      // this->json.at_pointer("/") = boost::json::object {};
 
-      // this->json.as_object().emplace(name, "value");
-      // json_attrset.emplace(name, "value");
+      auto name = this->state->symbols[attr.name].c_str();
+
+      if(this->visited.find(attr.value) != this->visited.end()) {
+        this->json.at_pointer(json_path).as_object().emplace(name, "RECURSION");
+        continue; // skip to avoid recursion
+      }
+      this->visited.insert(attr.value);
+
       this->json.at_pointer(json_path).as_object().emplace(name, boost::json::object {});
-      // std::cout << json_attrset << std::endl;
-      // auto object = this->json.at_pointer("/").as_object();
-      // auto object = this->json.as_object();
-      // object[name] = boost::json::object {};
-      // std::cout << json << std::endl;
 
       auto next_path = new AttrPath(*path);
       next_path->push_back(attr.name);
