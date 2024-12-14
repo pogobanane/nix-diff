@@ -36,7 +36,8 @@ int main()
 
     // Store * store = nix_store_open(NULL, "dummy://", NULL);
     nix::Store::Params params_map;
-    std::string uri = "dummy://";
+    // std::string uri = "dummy://";
+    std::string uri = "/tmp/debug-store";
     nix::ref<nix::Store> store = nix::openStore(uri, params_map);
 
 

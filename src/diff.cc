@@ -24,6 +24,27 @@ private:
     }
     return ret.str();
   }
+
+  // based on nixpkgs.lib.isDerivation
+  bool isDerivation(nix::Value *value) {
+    // could be more efficient with value->attrs()->get(...)
+    for (auto attr : *value->attrs()) {
+      auto name = this->state->symbols[attr.name];
+      if(std::string(name).compare("type") == 0) {
+        if (attr.value->type() != nix::ValueType::nString) {
+          return false;
+        }
+        auto type = attr.value->string_view();
+        if(type == "derivation") {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+    return false;
+  }
+
 public:
 
   void diff(nix::EvalState *state, nix::Expr *expr) {
@@ -70,6 +91,11 @@ public:
 
   void diff_attrset(nix::Value *value, const AttrPath *path) {
     auto json_path = this->json_path(path);
+
+    if (this->isDerivation(value)) {
+      this->json.at_pointer(json_path).as_object().emplace("DERIVATION", "todo");
+      return;
+    }
 
     // nix::PosIdx last_index;
     for (auto attr : *value->attrs()) {
