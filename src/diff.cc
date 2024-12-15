@@ -43,7 +43,7 @@ private:
           return false;
         }
         auto type = attr.value->string_view();
-        if(type == "derivation") {
+        if(std::string("derivation").compare(type) == 0) {
           return true;
         } else {
           return false;
