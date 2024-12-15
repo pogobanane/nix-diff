@@ -89,7 +89,7 @@ int main()
     nix::Value * value = state.allocValue();
     // // nix_printer nix_printer = nix_printer(std::cout);
 
-    std::ifstream ifs("dump-config.nix");
+    std::ifstream ifs("expression.nix");
     std::string content( (std::istreambuf_iterator<char>(ifs) ),
                        (std::istreambuf_iterator<char>()    ) );
 
