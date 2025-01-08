@@ -112,9 +112,12 @@ public:
     auto json_path = this->json_path(path);
     this->json.at_pointer(json_path).emplace_object();
 
-    if (this->state->isDerivation(*value)) {
-      this->json.at_pointer(json_path).as_object().emplace("DERIVATION", "todo");
-      return;
+    try {
+      if (this->state->isDerivation(*value)) {
+        this->json.at_pointer(json_path).as_object().emplace("DERIVATION", "todo");
+        return;
+      }
+    } catch (nix::ThrownError &e) { // may throw error when there is an option without a value
     }
 
     // nix::PosIdx last_index;
