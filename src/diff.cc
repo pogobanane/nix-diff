@@ -33,26 +33,6 @@ private:
     return ret.str();
   }
 
-  // based on nixpkgs.lib.isDerivation
-  bool isDerivation(nix::Value *value) {
-    // could be more efficient with value->attrs()->get(...)
-    for (auto attr : *value->attrs()) {
-      auto name = this->state->symbols[attr.name];
-      if(std::string(name).compare("type") == 0) {
-        if (attr.value->type() != nix::ValueType::nString) {
-          return false;
-        }
-        auto type = attr.value->string_view();
-        if(std::string("derivation").compare(type) == 0) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }
-    return false;
-  }
-
   bool isIgnored(const char *name) {
     for (auto ingore_name : this->ignore) {
       if(std::string(name).compare(ingore_name) == 0) {
@@ -132,7 +112,7 @@ public:
     auto json_path = this->json_path(path);
     this->json.at_pointer(json_path).emplace_object();
 
-    if (this->isDerivation(value)) {
+    if (this->state->isDerivation(*value)) {
       this->json.at_pointer(json_path).as_object().emplace("DERIVATION", "todo");
       return;
     }
